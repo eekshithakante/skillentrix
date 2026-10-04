@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Project 1: AI Customer Support Ticket Triage
+model Ticket {
+  id                 String   @id @default(cuid())
+  text               String
+  customer           String?
+  channel            String?
+  category           String
+  categoryConfidence Float
+  urgency            String
+  urgencyConfidence  Float
+  queue              String
+  keyIndicators      String   @default("[]") // JSON array of indicator phrases
+  needsReview        Boolean  @default(false)
+  reviewed           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// Project 2: AI Meeting Action-Item Extractor
+model MeetingExtraction {
+  id         String       @id @default(cuid())
+  title      String
+  transcript String
+  createdAt  DateTime     @default(now())
+  items      ActionItem[]
+
+  @@index([createdAt])
+}
+
+model ActionItem {
+  id           String            @id @default(cuid())
+  extractionId String
+  extraction   MeetingExtraction @relation(fields: [extractionId], references: [id], onDelete: Cascade)
+  task         String
+  owner        String?
+  deadline     String?
+  confidence   Float
+  status       String            @default("open") // open | done
+  warnings     String            @default("[]") // JSON array of validation warnings
+  createdAt    DateTime          @default(now())
+
+  @@index([extractionId])
+}
+
+// Project 3: AI Document Risk & Compliance Classifier
+model DocumentAnalysis {
+  id                String   @id @default(cuid())
+  title             String
+  text              String
+  riskLevel        String
+  category          String
+  confidence        Float
+  summary           String   @default("")
+  keyTerms          String   @default("[]") // JSON array of important terms
+  similarDocuments  String   @default("[]") // JSON array of similar doc titles
+  needsReview       Boolean  @default(false)
+  reviewed          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  @@index([createdAt])
+}
